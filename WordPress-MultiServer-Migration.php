@@ -8,7 +8,7 @@
 define( 'WP_MULTISERVER_DIR', dirname( __FILE__ ) . '/' );
 define( 'WP_MULTISERVER_VAR', WP_MULTISERVER_DIR . 'var/' );
 
-add_action( 'init', '_wp_multiserver_i18n' );
+add_action( 'plugins_loaded', '_wp_multiserver_i18n', 1 );
 
 function _wp_multiserver_i18n() {
 	load_plugin_textdomain( 'WordPress-MultiServer-Migration', false, dirname( __FILE__ ) . '/languages' );
