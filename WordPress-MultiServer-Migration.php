@@ -39,3 +39,5 @@ if( function_exists( 'spl_autoload_register' ) ) {
 			require( WP_MULTISERVER_DIR . "$wpm_dir/$wpm_file.php" );
 	unset( $files_list, $wpm_file_type, $wpm_dir, $wpm_file );
 }
+
+WP_MultiServer_Migration::init();
