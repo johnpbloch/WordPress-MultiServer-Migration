@@ -54,6 +54,14 @@ abstract class JPB_Options {
 				$this->{$option} = $options[$option];
 			}
 		}
+		$this->after_setup();
+	}
+	
+	/**
+	 * Runs after '_assign_vars'. Default is a no-op function that may be overridden by extending classes.
+	 */
+	protected function after_setup(){
+		
 	}
 
 	/**
@@ -94,6 +102,7 @@ abstract class JPB_Options {
 		foreach( $this->_builtin_properties as $property ) {
 			$updatedOptions[$property] = $this->{$property};
 		}
+		$this->after_setup();
 		return update_option( $this->_option_name, $updatedOptions );
 	}
 

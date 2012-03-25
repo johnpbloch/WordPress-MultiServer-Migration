@@ -40,4 +40,4 @@ if( function_exists( 'spl_autoload_register' ) ) {
 	unset( $files_list, $wpm_file_type, $wpm_dir, $wpm_file );
 }
 
-WP_MultiServer_Migration::init();
+WP_MultiServer_Migration::bootstrap();
