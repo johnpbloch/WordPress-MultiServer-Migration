@@ -1,19 +1,22 @@
 <?php
 
-class WP_MSM_Options extends JPB_Options {
+class WP_MSM_Options extends JPB_Options
+{
 
 	protected $_option_name = 'WP_MultiServer_Migrations_options';
 	private static $_instance = null;
-	public $version = '0.1.0.1';
+	public $version = '0.1.0.2';
 	public $publicSignature = '';
 	public $privateSignature = '';
 	public $acceptsConnections = 0;
 
-	protected function after_setup() {
+	protected function after_setup()
+	{
 		$this->acceptsConnections = (bool)$this->acceptsConnections;
 	}
 
-	protected function _sanitize() {
+	protected function _sanitize()
+	{
 		$this->acceptsConnections = $this->acceptsConnections ? 1 : 0;
 	}
 
@@ -21,30 +24,32 @@ class WP_MSM_Options extends JPB_Options {
 	 * (create and) Fetch the pseudo-singleton
 	 * @return WP_MSM_Options
 	 */
-	public static function instance() {
+	public static function instance()
+	{
 		if( empty( self::$_instance ) )
 			self::$_instance = new WP_MSM_Options;
 		return self::$_instance;
 	}
 
-	protected function _install() {
-		$this->publicSignature = wp_generate_password( 24, true, true );
-		$this->privateSignature = wp_generate_password( 32, true, true );
+	protected function _install()
+	{
+		$keys = WP_MSM_OpenSSL::generate_keys( false );
+		$this->publicSignature = $keys['public_key'];
+		$this->privateSignature = $keys['private_key'];
 		$this->update();
 		flush_rewrite_rules();
 	}
 
-	protected function _upgrade( array $options ) {
+	protected function _upgrade( array $options )
+	{
 		if( empty( $options['version'] ) )
 			return $this->_install();
-		switch( $options['version'] ) {
-			case '0.1' :
-				$this->publicSignature = wp_generate_password( 24, true, true );
-				break;
-			case '0.1.0.1' :
-				$this->privateSignature = wp_generate_password( 32, true, true );
-				break;
+		switch( $options['version'] )
+		{
 			default:
+				$keys = WP_MSM_OpenSSL::generate_keys( false );
+				$this->publicSignature = $keys['public_key'];
+				$this->privateSignature = $keys['private_key'];
 				break;
 		}
 		$this->update();
