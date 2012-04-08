@@ -31,4 +31,38 @@ class WP_MSM_OpenSSL
 		return $options->update();
 	}
 
+	/**
+	 * Encrypt arbitrary text.
+	 * 
+	 * If a key is not provided, it is assumed that this is a private key encryption
+	 * and the plugin's internal private key will be used. Otherwise, the provided
+	 * key is assumed to be a public key.
+	 * 
+	 * Any value that will work with openssl_public_encrypt will work for the $key
+	 * argument. See http://us3.php.net/manual/en/openssl.certparams.php for more
+	 * information.
+	 * 
+	 * Returns the encrypted text on success, false on failure.
+	 * 
+	 * @link http://us3.php.net/manual/en/openssl.certparams.php Key parameter details.
+	 * @param string $text The text to be encrypted.
+	 * @param mixed $key False to use the internal private key, an OpenSSL key value otherwise
+	 * @return boolean 
+	 */
+	public static function encrypt( $text, $key = false )
+	{
+		if( !$key )
+		{
+			$key = WP_MSM_Options::instance()->privateSignature;
+			$worked = openssl_private_encrypt( $text, $encrypted_text, $key );
+			if( $worked )
+				return $encrypted_text;
+			return false;
+		}
+		$worked = openssl_public_encrypt( $text, $encrypted_text, $key );
+		if( $worked )
+			return $encrypted_text;
+		return false;
+	}
+
 }
