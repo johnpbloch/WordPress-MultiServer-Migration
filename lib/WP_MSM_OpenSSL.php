@@ -65,4 +65,38 @@ class WP_MSM_OpenSSL
 		return false;
 	}
 
+	/**
+	 * Decrypt encrypted text.
+	 * 
+	 * If a key is not provided, it is assumed that this is a private key decryption
+	 * and the plugin's internal private key will be used. Otherwise, the provided
+	 * key is assumed to be a public key.
+	 * 
+	 * Any value that will work with openssl_public_decrypt will work for the $key
+	 * argument. See http://us3.php.net/manual/en/openssl.certparams.php for more
+	 * information.
+	 * 
+	 * Returns the decrypted text on success, false on failure.
+	 * 
+	 * @link http://us3.php.net/manual/en/openssl.certparams.php Key parameter details.
+	 * @param string $encrypted_text The text to be decrypted.
+	 * @param mixed $key False to use the internal private key, an OpenSSL key value otherwise
+	 * @return boolean 
+	 */
+	public static function decrypt( $encrypted_text, $key = false )
+	{
+		if( !$key )
+		{
+			$key = WP_MSM_Options::instance()->privateSignature;
+			$worked = openssl_private_decrypt( $encrypted_text, $decrypted_text, $key );
+			if( $worked )
+				return $decrypted_text;
+			return false;
+		}
+		$worked = openssl_public_decrypt( $encrypted_text, $decrypted_text, $key );
+		if( $worked )
+			return $decrypted_text;
+		return false;
+	}
+
 }
