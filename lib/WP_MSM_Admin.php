@@ -31,7 +31,7 @@ class WP_MSM_Admin
 			'page' => 'wpmsm',
 		);
 		if( $page != 'manage' )
-			$args['action'] = $page;
+			$args['subpage'] = $page;
 		$url = add_query_arg( $args, admin_url( 'options-general.php' ) );
 		return $url;
 	}
@@ -48,7 +48,7 @@ class WP_MSM_Admin
 	private static function getCurrentPage()
 	{
 		$pages = self::getAvailablePages();
-		$current_page = empty( $_GET['action'] ) || !isset( $pages[$_GET['action']] ) ? 'manage' : $_GET['action'];
+		$current_page = empty( $_GET['subpage'] ) || !isset( $pages[$_GET['subpage']] ) ? 'manage' : $_GET['subpage'];
 		return $current_page;
 	}
 
