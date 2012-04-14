@@ -7,5 +7,6 @@ return array(
 		'WP_MSM_Options',
 		'WP_MSM_OpenSSL',
 		'WP_MSM_Endpoint',
+		'WP_MSM_Admin',
 	),
 );
