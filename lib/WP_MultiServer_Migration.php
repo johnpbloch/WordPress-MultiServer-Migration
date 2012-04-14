@@ -11,6 +11,11 @@ class WP_MultiServer_Migration
 		add_action( 'parse_request', array( __CLASS__, 'maybeDoEndpoint' ), 1 );
 		add_action( 'wpmsm_create_new_keys', array( 'WP_MSM_OpenSSL', 'generate_keys' ) );
 		add_action( 'cron_schedules', array( __CLASS__, 'create_monthly_schedule' ) );
+		if( is_admin() )
+		{
+			add_action( 'load-settings_page_wpmsm', array( 'WP_MSM_Admin', 'preLoadPage' ) );
+			add_action( 'admin_menu', array( __CLASS__, 'adminMenu' ) );
+		}
 	}
 
 	/**
@@ -69,6 +74,11 @@ class WP_MultiServer_Migration
 			);
 		}
 		return $schedules;
+	}
+
+	public static function adminMenu()
+	{
+		add_options_page( __( 'Manage Servers', 'WordPress-MultiServer-Migration' ), __( 'Manage Servers', 'WordPress-MultiServer-Migration' ), 'manage_options', 'wpmsm', array( 'WP_MSM_Admin', 'render' ) );
 	}
 
 }
