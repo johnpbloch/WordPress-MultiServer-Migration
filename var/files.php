@@ -8,5 +8,7 @@ return array(
 		'WP_MSM_OpenSSL',
 		'WP_MSM_Endpoint',
 		'WP_MSM_Admin',
+		'WP_MSM_Profile_Manager',
+		'WP_MSM_Profile',
 	),
 );
