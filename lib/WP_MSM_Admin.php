@@ -41,6 +41,7 @@ class WP_MSM_Admin
 		return array(
 			'manage' => __( 'Manage Servers', 'WordPress-MultiServer-Migration' ),
 			'settings' => __( 'Server Settings', 'WordPress-MultiServer-Migration' ),
+			'profiles' => __( 'Manage Profiles', 'WordPress-MultiServer-Migration' ),
 		);
 	}
 
@@ -76,12 +77,17 @@ class WP_MSM_Admin
 
 	private static function _render_manage()
 	{
-		echo 'manage';
+		
 	}
 
 	private static function _render_settings()
 	{
-		echo 'settings';
+		
+	}
+
+	private static function _render_profiles()
+	{
+		
 	}
 
 }
