@@ -1,3 +1,4 @@
+
 <?php
 
 class WP_MultiServer_Migration
@@ -7,6 +8,7 @@ class WP_MultiServer_Migration
 	{
 		add_action( 'init', array( __CLASS__, 'init' ), 11 );
 		add_action( 'parse_request', array( __CLASS__, 'maybeDoManifest' ), 1 );
+		add_action( 'parse_request', array( __CLASS__, 'maybeDoEndpoint' ), 1 );
 		add_action( 'wpmsm_create_new_keys', array( 'WP_MSM_OpenSSL', 'generate_keys' ) );
 		add_action( 'cron_schedules', array( __CLASS__, 'create_monthly_schedule' ) );
 	}
@@ -18,6 +20,8 @@ class WP_MultiServer_Migration
 	{
 		global $wp;
 		add_rewrite_rule( 'wpmsm-manifest\.json$', 'index.php?wpmsmm=1', 'top' );
+		add_rewrite_tag( '%wpmsmaction%', '(.+)' );
+		add_permastruct( 'wpmsmendpoint', '/wpmsm-endpoint/%wpmsmaction%', false );
 		$wp->add_query_var( 'wpmsmm' );
 		if( !wp_next_scheduled( 'wpmsm_create_new_keys' ) )
 		{
@@ -34,6 +38,25 @@ class WP_MultiServer_Migration
 		header( 'Content-type: application/json' );
 		require( WP_MULTISERVER_VAR . '/manifest.php' );
 		exit;
+	}
+
+	public static function maybeDoEndpoint( WP &$wp )
+	{
+		if( empty( $wp->query_vars['wpmsmaction'] ) )
+		{
+			return;
+		}
+		$request = WP_MSM_Endpoint::parse( $wp->query_vars['wpmsmaction'] );
+		if( $request )
+		{
+			header( 'HTTP/1.0 200 OK' );
+			exit;
+		}
+		else
+		{
+			header( 'HTTP/1.0 403 Forbidden' );
+			exit;
+		}
 	}
 
 	public static function create_monthly_schedule( array $schedules )
