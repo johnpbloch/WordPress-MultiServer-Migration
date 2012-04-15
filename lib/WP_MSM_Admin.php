@@ -88,6 +88,7 @@ class WP_MSM_Admin
 	private static function _render_profiles()
 	{
 		$profileManager = new WP_MSM_Profile_Manager();
+		$listTable = new WP_MSM_Profile_List_Table();
 	}
 
 }

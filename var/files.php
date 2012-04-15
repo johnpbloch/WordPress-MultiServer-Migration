@@ -10,5 +10,6 @@ return array(
 		'WP_MSM_Admin',
 		'WP_MSM_Profile_Manager',
 		'WP_MSM_Profile',
+		'WP_MSM_Profile_List_Table'
 	),
 );
