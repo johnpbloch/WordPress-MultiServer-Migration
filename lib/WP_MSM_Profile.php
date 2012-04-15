@@ -12,7 +12,7 @@ class WP_MSM_Profile
 
 	function __construct( array $settings )
 	{
-		$defaults = get_object_vars( $this );
+		$defaults = call_user_func( 'get_class_vars', get_class( $this ) );
 		$this->defaults = array_keys( $defaults );
 		$settings = array_merge( $defaults, array_intersect_key( $settings, $defaults ) );
 		foreach( $settings as $key => $setting )
