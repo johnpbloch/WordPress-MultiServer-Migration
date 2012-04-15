@@ -164,4 +164,15 @@ class WP_MSM_Profile_Manager
 		return array_keys( self::$profiles );
 	}
 
+	/**
+	 * Check whether a profile is a default profile or not
+	 * 
+	 * @param string The profile name to check
+	 * @return boolean Whether the profile is a default one. 
+	 */
+	public function is_default_profile( $name )
+	{
+		return in_array( $name, self::$defaultProfiles );
+	}
+
 }
