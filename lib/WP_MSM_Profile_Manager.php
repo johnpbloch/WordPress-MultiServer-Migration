@@ -27,6 +27,12 @@ class WP_MSM_Profile_Manager
 	function __construct()
 	{
 		$this->createDefaultProfiles();
+		$options = WP_MSM_Options::instance();
+		foreach( $options->customProfiles as $name => $profile )
+		{
+			$profile = new WP_MSM_Profile( $profile );
+			$this->add_profile( $name, $profile );
+		}
 	}
 
 	/**
@@ -82,6 +88,12 @@ class WP_MSM_Profile_Manager
 		if( isset( self::$profiles[$name] ) && self::$profiles[$name] instanceof WP_MSM_Profile )
 			return;
 		self::$profiles[$name] = $profile;
+		$options = WP_MSM_Options::instance();
+		if( !isset( $options->customProfiles[$name] ) )
+		{
+			$options->customProfiles[$name] = $profile->_toArray();
+			$options->update();
+		}
 	}
 
 	/**
@@ -95,6 +107,12 @@ class WP_MSM_Profile_Manager
 			return;
 		if( isset( self::$profiles[$name] ) )
 			unset( self::$profiles[$name] );
+		$options = WP_MSM_Options::instance();
+		if( isset( $options->customProfiles[$name] ) )
+		{
+			unset( $options->customProfiles[$name] );
+			$options->update();
+		}
 	}
 
 	/**
@@ -113,6 +131,12 @@ class WP_MSM_Profile_Manager
 		if( isset( self::$profiles[$name] ) )
 			unset( self::$profiles[$name] );
 		self::$profiles[$name] = $profile;
+		$options = WP_MSM_Options::instance();
+		if( isset( $options->customProfiles[$name] ) )
+		{
+			$options->customProfiles[$name] = $profile->_toArray();
+			$options->update();
+		}
 	}
 
 	/**
