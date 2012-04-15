@@ -5,10 +5,11 @@ class WP_MSM_Options extends JPB_Options
 
 	protected $_option_name = 'WP_MultiServer_Migrations_options';
 	private static $_instance = null;
-	public $version = '0.1.0.2';
+	public $version = '0.1.0.3';
 	public $publicSignature = '';
 	public $privateSignature = '';
 	public $acceptsConnections = 0;
+	public $customProfiles = array();
 
 	protected function after_setup()
 	{
@@ -47,9 +48,6 @@ class WP_MSM_Options extends JPB_Options
 		switch( $options['version'] )
 		{
 			default:
-				$keys = WP_MSM_OpenSSL::generate_keys( false );
-				$this->publicSignature = $keys['public_key'];
-				$this->privateSignature = $keys['private_key'];
 				break;
 		}
 		$this->update();
