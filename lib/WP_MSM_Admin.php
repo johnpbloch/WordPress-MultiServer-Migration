@@ -3,9 +3,20 @@
 class WP_MSM_Admin
 {
 
+	/**
+	 * The list table for profiles.
+	 * 
+	 * @var WP_MSM_Profile_List_Table 
+	 */
+	protected static $profileListTable;
+
 	public static function preLoadPage()
 	{
-		
+		if( !empty( $_GET['subpage'] ) && $_GET['subpage'] == 'profiles' )
+		{
+			self::$profileListTable = new WP_MSM_Profile_List_Table();
+			self::$profileListTable->prepare_items();
+		}
 	}
 
 	public static function render()
@@ -87,8 +98,17 @@ class WP_MSM_Admin
 
 	private static function _render_profiles()
 	{
-		$profileManager = new WP_MSM_Profile_Manager();
-		$listTable = new WP_MSM_Profile_List_Table();
+		self::$profileListTable->views();
+		?>
+		<form method="get" action="">
+			<br />
+			<?php self::$profileListTable->search_box( __( 'Search Profiles', 'WordPress-MultiServer-Migration' ), 'profiles' ); ?>
+		</form>
+		<form method="post" action="">
+			<input type="hidden" name="paged" value="<?php echo esc_attr( self::$profileListTable->get_pagenum() ) ?>" />
+			<?php self::$profileListTable->display(); ?>
+		</form>
+		<?php
 	}
 
 }
