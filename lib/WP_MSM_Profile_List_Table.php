@@ -25,6 +25,7 @@ class WP_MSM_Profile_List_Table extends WP_List_Table
 			'cb' => (empty( WP_MSM_Options::instance()->customProfiles ) ? '' : '<input type="checkbox" />'),
 			'name' => __( 'Name', 'WordPress-MultiServer-Migration' ),
 			'description' => __( 'Description', 'WordPress-MultiServer-Migration' ),
+			'tables' => __( 'Tables to Exclude', 'WordPress-MultiServer-Migration' ),
 		);
 	}
 
@@ -105,6 +106,23 @@ class WP_MSM_Profile_List_Table extends WP_List_Table
 	protected function column_description( WP_MSM_Profile $profile )
 	{
 		echo esc_html( $profile->description );
+	}
+
+	protected function column_tables( WP_MSM_Profile $profile )
+	{
+		if( !$profile->canExport )
+		{
+			echo 'Export disabled.';
+		}
+		elseif( empty( $profile->dbTablesToExclude ) )
+		{
+			echo 'No tables excluded';
+		}
+		else
+		{
+			$tables = implode( ', ', $profile->dbTablesToExclude );
+			echo esc_html( $tables );
+		}
 	}
 
 }
