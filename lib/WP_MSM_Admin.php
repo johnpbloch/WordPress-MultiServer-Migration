@@ -98,17 +98,41 @@ class WP_MSM_Admin
 
 	private static function _render_profiles()
 	{
-		self::$profileListTable->views();
-		?>
-		<form method="get" action="">
-			<br />
-			<?php self::$profileListTable->search_box( __( 'Search Profiles', 'WordPress-MultiServer-Migration' ), 'profiles' ); ?>
-		</form>
-		<form method="post" action="">
-			<input type="hidden" name="paged" value="<?php echo esc_attr( self::$profileListTable->get_pagenum() ) ?>" />
-			<?php self::$profileListTable->display(); ?>
-		</form>
-		<?php
+		$action = empty( $_GET['action'] ) ? '' : stripslashes( $_GET['action'] );
+		switch( $action )
+		{
+			case 'edit':
+				$profileManager = new WP_MSM_Profile_Manager();
+				$profile = empty( $_GET['profile'] ) ? '' : $_GET['profile'];
+				$profile = $profileManager->get_profile( $profile );
+				if( !$profile )
+				{
+					wp_die( 'That profile does not exist!' );
+				}
+				?>
+				<form method="post" action="">
+					<?php wp_nonce_field( 'wpmsm_edit_profile_' . $profile->name ); ?>
+				</form>
+				<?php
+				break;
+			default:
+				self::$profileListTable->views();
+				?>
+				<form method="get" action="">
+					<br />
+					<?php self::$profileListTable->search_box( __( 'Search Profiles', 'WordPress-MultiServer-Migration' ), 'profiles' ); ?>
+				</form>
+				<form method="post" action="">
+					<input type="hidden" name="paged" value="<?php echo esc_attr( self::$profileListTable->get_pagenum() ) ?>" />
+					<style>
+						.wp-list-table th#name {
+							width: 15%;
+						}
+					</style>
+					<?php self::$profileListTable->display(); ?>
+				</form>
+			<?php
+		}
 	}
 
 }
