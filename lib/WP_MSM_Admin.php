@@ -75,6 +75,11 @@ class WP_MSM_Admin
 	public static function render()
 	{
 		?>
+		<style>
+			.wrap div.updated, .wrap div.error {
+				margin-bottom: 0;
+			}
+		</style>
 		<div class="wrap">
 			<div class="icon32">
 				<img src="<?php echo esc_url( plugins_url( 'media/img/servers-icon.png', dirname( __FILE__ ) ) ); ?>" />
