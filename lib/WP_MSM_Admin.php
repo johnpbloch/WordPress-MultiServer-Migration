@@ -14,8 +14,39 @@ class WP_MSM_Admin
 	{
 		if( !empty( $_GET['subpage'] ) && $_GET['subpage'] == 'profiles' )
 		{
-			self::$profileListTable = new WP_MSM_Profile_List_Table();
-			self::$profileListTable->prepare_items();
+			$action = empty( $_GET['action'] ) ? '' : stripslashes( $_GET['action'] );
+			switch( $action )
+			{
+				case 'duplicate':
+					$profile = empty( $_GET['profile'] ) ? '' : $_GET['profile'];
+					check_admin_referer( "wpmsm_duplicate_profile_$profile" );
+					$profileManager = new WP_MSM_Profile_Manager();
+					$theProfile = $profileManager->get_profile( $profile );
+					if( !$theProfile )
+					{
+						wp_die( __( "That profile does not exist.", 'WordPress-MultiServer-Migration' ) );
+					}
+					$newProfile = $theProfile->_toArray();
+					$counter = 2;
+					while( $profileManager->get_profile( $theProfile->name . $counter ) )
+					{
+						$counter++;
+					}
+					$newProfile['name'] = $theProfile->name . $counter;
+					$newProfile['displayName'] = $theProfile->displayName . " $counter";
+					$newProfile = new WP_MSM_Profile( $newProfile );
+					$profileManager->add_profile( $newProfile->name, $newProfile );
+					$redirectUrl = add_query_arg( array(
+						'action' => 'edit',
+						'profile' => $newProfile->name,
+							), self::pageURL( 'profiles' ) );
+					wp_redirect( $redirectUrl );
+					exit;
+					break;
+				default:
+					self::$profileListTable = new WP_MSM_Profile_List_Table();
+					self::$profileListTable->prepare_items();
+			}
 		}
 	}
 
