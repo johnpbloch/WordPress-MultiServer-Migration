@@ -17,6 +17,25 @@ class WP_MSM_Admin
 			$action = empty( $_GET['action'] ) ? '' : stripslashes( $_GET['action'] );
 			switch( $action )
 			{
+				case 'delete':
+					$profile = empty( $_GET['profile'] ) ? '' : $_GET['profile'];
+					check_admin_referer( "wpmsm_delete_profile_$profile" );
+					$profileManager = new WP_MSM_Profile_Manager();
+					if( !$profileManager->get_profile( $profile ) )
+					{
+						wp_die( __( 'That profile does not exist.', 'WordPress-MultiServer-Migration' ) );
+					}
+					elseif( $profileManager->is_default_profile( $profile ) )
+					{
+						wp_die( __( 'Cannot delete default profiles.', 'WordPress-MultiServer-Migration' ) );
+					}
+					$profileManager->delete_profile( $profile );
+					$redirectUrl = add_query_arg( array(
+						'action' => 'deleted',
+							), self::pageURL( 'profiles' ) );
+					wp_redirect( $redirectUrl );
+					exit;
+					break;
 				case 'duplicate':
 					$profile = empty( $_GET['profile'] ) ? '' : $_GET['profile'];
 					check_admin_referer( "wpmsm_duplicate_profile_$profile" );
@@ -43,6 +62,9 @@ class WP_MSM_Admin
 					wp_redirect( $redirectUrl );
 					exit;
 					break;
+				case 'deleted':
+					// Add a settings error and then intentionally fall through to the default listing action.
+					add_settings_error( '', 'profile-deleted', __( 'The profile was successfully deleted.', 'WordPress-MultiServer-Migration' ), 'updated' );
 				default:
 					self::$profileListTable = new WP_MSM_Profile_List_Table();
 					self::$profileListTable->prepare_items();
