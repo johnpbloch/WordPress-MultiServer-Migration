@@ -17,6 +17,34 @@ class WP_MSM_Admin
 			$action = empty( $_GET['action'] ) ? '' : stripslashes( $_GET['action'] );
 			switch( $action )
 			{
+				case 'edit':
+					$submitted = empty( $_POST['wpmsm'] ) ? false : $_POST['wpmsm'];
+					if( empty( $_POST['_wpnonce'] ) || !$submitted )
+					{
+						break;
+					}
+					check_admin_referer( "wpmsm_edit_profile_{$_GET['profile']}" );
+					$submitted = stripslashes_deep( $submitted );
+					$profileManager = new WP_MSM_Profile_Manager();
+					$profile = $profileManager->get_profile( $_GET['profile'] );
+					if( !$profile )
+					{
+						wp_die( __( 'That profile does not exist.', 'WordPress-MultiServer-Migration' ) );
+					}
+					$slugName = $submitted['name'];
+					$slugName = sanitize_title_with_dashes( $slugName );
+					if( $slugName != $profile->name && $profileManager->get_profile( $slugName ) )
+					{
+						add_settings_error( '', 'name-collision', __( 'Invalid name. Name already exists.', 'WordPress-MultiServer-Migration' ) );
+						break;
+					}
+					$profile->name = $slugName;
+					$profile->displayName = $submitted['name'];
+					$profile->description = $submitted['description'];
+					$profile->canExport = 'no' === $submitted['disable_export'];
+					$profile->dbTablesToExclude = $submitted['exclude_table'];
+					$profileManager->update_profile( $_GET['profile'], $profile );
+					break;
 				case 'delete':
 					$profile = empty( $_GET['profile'] ) ? '' : $_GET['profile'];
 					check_admin_referer( "wpmsm_delete_profile_$profile" );
@@ -156,6 +184,7 @@ class WP_MSM_Admin
 
 	private static function _render_profiles()
 	{
+		global $wpdb;
 		$action = empty( $_GET['action'] ) ? '' : stripslashes( $_GET['action'] );
 		switch( $action )
 		{
@@ -168,8 +197,63 @@ class WP_MSM_Admin
 					wp_die( 'That profile does not exist!' );
 				}
 				?>
-				<form method="post" action="">
+				<form style="max-width:500px;" method="post" action="">
+					<h2><?php printf( __( 'Edit Profile: %s', '' ), $profile->displayName ); ?></h2>
 					<?php wp_nonce_field( 'wpmsm_edit_profile_' . $profile->name ); ?>
+					<p>
+						<label for="wpmsm_name"><strong><?php _e( 'Profile Name', 'WordPress-MultiServer-Migration' ); ?></strong></label><br />
+						<input type="text" class="widefat" name="wpmsm[name]" id="wpmsm_name" value="<?php echo esc_attr( $profile->displayName ); ?>" />
+					</p>
+					<p>
+						<label for="wpmsm_description"><strong><?php _e( 'Description', 'WordPress-MultiServer-Migration' ); ?></strong></label><br />
+						<textarea name="wpmsm[description]" class="widefat" id="wpmsm_description"><?php echo esc_textarea( $profile->description ); ?></textarea>
+					</p>
+					<p>
+						<strong><?php _e( 'Disable export?', 'WordPress-MultiServer-Migration' ); ?></strong><br />
+						<input type="radio" name="wpmsm[disable_export]" value="yes" id="wpmsm_disable_export_yes"<?php checked( !$profile->canExport ); ?> />
+						<label for="wpmsm_disable_export_yes"> Yes </label>
+						<input type="radio" name="wpmsm[disable_export]" value="no" id="wpmsm_disable_export_no"<?php checked( $profile->canExport ); ?> />
+						<label for="wpmsm_disable_export_no"> No</label>
+					</p>
+					<?php
+					$tables = $wpdb->get_col( "SHOW TABLES LIKE '$wpdb->prefix%';" );
+					foreach( $tables as &$table )
+						$table = preg_replace( '@^' . preg_quote( $wpdb->prefix, '@' ) . '@', '', $table );
+					unset( $table );
+					$table_names = array(
+						'commentmeta' => __( 'Comment Meta', 'WordPress-MultiServer-Migration' ),
+						'comments' => __( 'Comments', 'WordPress-MultiServer-Migration' ),
+						'links' => __( 'Links', 'WordPress-MultiServer-Migration' ),
+						'options' => __( 'Options', 'WordPress-MultiServer-Migration' ),
+						'postmeta' => __( 'Post Meta', 'WordPress-MultiServer-Migration' ),
+						'posts' => __( 'Posts', 'WordPress-MultiServer-Migration' ),
+						'term_relationships' => __( 'Term Relationships', 'WordPress-MultiServer-Migration' ),
+						'term_taxonomy' => __( 'Term Taxonomy', 'WordPress-MultiServer-Migration' ),
+						'terms' => __( 'Terms', 'WordPress-MultiServer-Migration' ),
+						'usermeta' => __( 'User Meta', 'WordPress-MultiServer-Migration' ),
+						'users' => __( 'Users', 'WordPress-MultiServer-Migration' )
+					);
+					$counter = 0;
+					echo '<h4>Database Tables to exclude from exports</h4><p>';
+					foreach( $tables as $table )
+					{
+						$label = empty( $table_names[$table] ) ? $table : $table_names[$table];
+						$excluded = in_array( $table, $profile->dbTablesToExclude );
+						?>
+						<div style="width:30%;margin-right:3%;float:left;">
+							<label>
+								<input type="checkbox" name="wpmsm[exclude_table][]" value="<?php echo esc_attr( $table ); ?>"<?php checked( $excluded ); ?> />
+								<?php echo esc_html( $label ); ?></label>
+						</div>
+						<?php
+						if( !(++$counter % 3 ) )
+						{
+							echo '<div class="clear"></div></p><p>';
+						}
+					}
+					echo '<div class="clear"></div></p>';
+					submit_button( __( 'Update Profiles', 'WordPress-MultiServer-Migration' ) );
+					?>
 				</form>
 				<?php
 				break;
