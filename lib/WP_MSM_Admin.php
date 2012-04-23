@@ -261,7 +261,7 @@ class WP_MSM_Admin
 						}
 					}
 					echo '<div class="clear"></div></p>';
-					submit_button( __( 'Update Profiles', 'WordPress-MultiServer-Migration' ) );
+					submit_button( __( 'Update Profile', 'WordPress-MultiServer-Migration' ) );
 					?>
 				</form>
 				<?php
