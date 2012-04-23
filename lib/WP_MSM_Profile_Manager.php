@@ -130,11 +130,13 @@ class WP_MSM_Profile_Manager
 			return;
 		if( isset( self::$profiles[$name] ) )
 			unset( self::$profiles[$name] );
-		self::$profiles[$name] = $profile;
+		$newName = ($name == $profile->name) ? $name : $profile->name;
+		self::$profiles[$newName] = $profile;
 		$options = WP_MSM_Options::instance();
 		if( isset( $options->customProfiles[$name] ) )
 		{
-			$options->customProfiles[$name] = $profile->_toArray();
+			unset( $options->customProfiles[$name] );
+			$options->customProfiles[$newName] = $profile->_toArray();
 			$options->update();
 		}
 	}
