@@ -44,6 +44,15 @@ class WP_MSM_Admin
 					$profile->canExport = 'no' === $submitted['disable_export'];
 					$profile->dbTablesToExclude = $submitted['exclude_table'];
 					$profileManager->update_profile( $_GET['profile'], $profile );
+					if( $_GET['profile'] != $profile->name )
+					{
+						$redirectUrl = add_query_arg( array(
+							'action' => 'edit',
+							'profile' => $profile->name,
+								), self::pageURL( 'profiles' ) );
+						wp_redirect( $redirectUrl );
+						exit;
+					}
 					break;
 				case 'delete':
 					$profile = empty( $_GET['profile'] ) ? '' : $_GET['profile'];
