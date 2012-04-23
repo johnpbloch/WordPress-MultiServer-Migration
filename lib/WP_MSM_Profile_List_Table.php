@@ -22,7 +22,7 @@ class WP_MSM_Profile_List_Table extends WP_List_Table
 	public function get_columns()
 	{
 		return array(
-			'cb' => (empty( WP_MSM_Options::instance()->customProfiles ) ? '' : '<input type="checkbox" />'),
+			'cb' => (empty( WP_MSM_Options::instance()->customProfiles ) ? '' : ''), //<input type="checkbox" />'),
 			'name' => __( 'Name', 'WordPress-MultiServer-Migration' ),
 			'description' => __( 'Description', 'WordPress-MultiServer-Migration' ),
 			'tables' => __( 'Tables to Exclude', 'WordPress-MultiServer-Migration' ),
@@ -67,7 +67,7 @@ class WP_MSM_Profile_List_Table extends WP_List_Table
 		if( !$this->profileManager->is_default_profile( $profile->name ) )
 		{
 			?>
-			<input type="checkbox" name="checked[]" value="<?php echo esc_attr( $profile->name ); ?>" />
+			<!--			<input type="checkbox" name="checked[]" value="<?php echo esc_attr( $profile->name ); ?>" />-->
 			<?php
 		}
 	}
