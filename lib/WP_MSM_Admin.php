@@ -38,6 +38,10 @@ class WP_MSM_Admin
 						add_settings_error( '', 'name-collision', __( 'Invalid name. Name already exists.', 'WordPress-MultiServer-Migration' ) );
 						break;
 					}
+					if( empty( $submitted['exclude_table'] ) )
+					{
+						$submitted['exclude_table'] = array( );
+					}
 					$profile->name = $slugName;
 					$profile->displayName = $submitted['name'];
 					$profile->description = $submitted['description'];
@@ -53,6 +57,7 @@ class WP_MSM_Admin
 						wp_redirect( $redirectUrl );
 						exit;
 					}
+					add_settings_error( '', 'profile-updated', __( 'The profile was updated.', 'WordPress-MultiServer-Migration' ), 'updated' );
 					break;
 				case 'delete':
 					$profile = empty( $_GET['profile'] ) ? '' : $_GET['profile'];
@@ -137,7 +142,9 @@ class WP_MSM_Admin
 			'page' => 'wpmsm',
 		);
 		if( $page != 'manage' )
+		{
 			$args['subpage'] = $page;
+		}
 		$url = add_query_arg( $args, admin_url( 'options-general.php' ) );
 		return $url;
 	}
@@ -178,7 +185,9 @@ class WP_MSM_Admin
 	{
 		$current_page = self::getCurrentPage();
 		if( method_exists( __CLASS__, "_render_$current_page" ) )
+		{
 			call_user_func( array( __CLASS__, "_render_$current_page" ) );
+		}
 	}
 
 	private static function _render_manage()
@@ -227,7 +236,9 @@ class WP_MSM_Admin
 					<?php
 					$tables = $wpdb->get_col( "SHOW TABLES LIKE '$wpdb->prefix%';" );
 					foreach( $tables as &$table )
+					{
 						$table = preg_replace( '@^' . preg_quote( $wpdb->prefix, '@' ) . '@', '', $table );
+					}
 					unset( $table );
 					$table_names = array(
 						'commentmeta' => __( 'Comment Meta', 'WordPress-MultiServer-Migration' ),
@@ -244,18 +255,21 @@ class WP_MSM_Admin
 					);
 					$counter = 0;
 					echo '<h4>Database Tables to exclude from exports</h4><p>';
+					$disabled = disabled( $profile->canExport, false, false );
 					foreach( $tables as $table )
 					{
 						$label = empty( $table_names[$table] ) ? $table : $table_names[$table];
 						$excluded = in_array( $table, $profile->dbTablesToExclude );
+						$excluded = checked( $excluded, true, false );
 						?>
-						<div style="width:30%;margin-right:3%;float:left;">
+						<div class="excludeTableCheckbox" style="width:30%;margin-right:3%;float:left;">
 							<label>
-								<input type="checkbox" name="wpmsm[exclude_table][]" value="<?php echo esc_attr( $table ); ?>"<?php checked( $excluded ); ?> />
-								<?php echo esc_html( $label ); ?></label>
+								<input type="checkbox" name="wpmsm[exclude_table][]" value="<?php echo esc_attr( $table ); ?>"<?php echo $excluded . $disabled; ?> />
+								<?php echo esc_html( $label ); ?>
+							</label>
 						</div>
 						<?php
-						if( !(++$counter % 3 ) )
+						if( !( ++$counter % 3 ) )
 						{
 							echo '<div class="clear"></div></p><p>';
 						}
@@ -263,6 +277,16 @@ class WP_MSM_Admin
 					echo '<div class="clear"></div></p>';
 					submit_button( __( 'Update Profile', 'WordPress-MultiServer-Migration' ) );
 					?>
+					<script>
+						jQuery(document).ready(function($){
+							$('#wpmsm_disable_export_yes, #wpmsm_disable_export_no').change(function(){
+								var item = $('#wpmsm_disable_export_yes');
+								$('.excludeTableCheckbox input').each(function(k,i){
+									$(i).prop( 'disabled', item.prop('checked') );
+								});
+							});
+						});
+					</script>
 				</form>
 				<?php
 				break;
