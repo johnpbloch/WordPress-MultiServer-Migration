@@ -197,7 +197,35 @@ class WP_MSM_Admin
 
 	private static function _render_settings()
 	{
-		
+		$profileManager = new WP_MSM_Profile_Manager();
+		$currentProfile = WP_MSM_Options::instance()->profile;
+		$profiles = $profileManager->get_all_profile_names();
+		?>
+		<form method="post" action="">
+			<table class="form-table">
+				<tbody>
+					<tr valign="top">
+						<th scope="row"><label for="wpmsm_settings_profile">Please select a server profile</label></th>
+						<td>
+							<select id="wpmsm_settings_profile" name="wpmsm_settings[profile]">
+								<?php
+								foreach( $profiles as $profile )
+								{
+									$profile = $profileManager->get_profile( $profile );
+									?>
+									<option value="<?php echo esc_attr( $profile->name ); ?>"<?php selected( $profile->name, $currentProfile ); ?>>
+										<?php echo esc_html( $profile->displayName ); ?>
+									</option>
+									<?php
+								}
+								?>
+							</select>
+						</td>
+					</tr>
+				</tbody>
+			</table>
+		</form>
+		<?php
 	}
 
 	private static function _render_profiles()
