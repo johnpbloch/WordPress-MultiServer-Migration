@@ -5,11 +5,12 @@ class WP_MSM_Options extends JPB_Options
 
 	protected $_option_name = 'WP_MultiServer_Migrations_options';
 	private static $_instance = null;
-	public $version = '0.1.0.3';
+	public $version = '0.1.0.4';
 	public $publicSignature = '';
 	public $privateSignature = '';
 	public $acceptsConnections = 0;
 	public $customProfiles = array();
+	public $profile = 'testing';
 
 	protected function after_setup()
 	{
@@ -50,6 +51,8 @@ class WP_MSM_Options extends JPB_Options
 			default:
 				break;
 		}
+		unset( $options['version'] );
+		$this->_assign_vars( $options );
 		$this->update();
 	}
 
